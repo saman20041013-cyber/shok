@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeLogin & Live Tracker</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --bg: #f8fafc;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
+        
+        .container { 
+            background: white; padding: 30px; border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 400px; 
+        }
+
+        h2 { text-align: center; color: #1e293b; margin-top: 0; }
+        
+        .status-box {
+            padding: 10px; border-radius: 6px; margin-bottom: 20px;
+            font-size: 14px; text-align: center;
+            background: #fef2f2; color: var(--danger); border: 1px solid #fee2e2;
+        }
+
+        .status-box.active {
+            background: #f0fdf4; color: var(--success); border: 1px solid #dcfce7;
+        }
+
+        input {
+            width: 100%; padding: 12px; margin: 8px 0;
+            border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;
+        }
+
+        button {
+            width: 100%; padding: 12px; margin-top: 10px; border: none;
+            border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
+
+        .btn-location { background: #64748b; color: white; }
+        .btn-login { background: var(--primary); color: white; }
+        button:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        #adminPanel { 
+            margin-top: 30px; border-top: 2px solid #e2e8f0; 
+            padding-top: 20px; display: none; 
+        }
+
+        .history-item {
+            background: #f1f5f9; padding: 10px; border-radius: 6px;
+            margin-bottom: 10px; font-size: 13px; line-height: 1.6;
+        }
+
+        .map-link {
+            display: inline-block; margin-top: 5px; color: var(--danger);
+            text-decoration: none; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Secure Portal</h2>
+    
+    <div id="status" class="status-box">
+        📍 Location access required to login.
+    </div>
+
+    <button class="btn-location" onclick="enableLocation()">Enable Location Access</button>
+    
+    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+    <input type="text" id="user" placeholder="Username (safaa)" disabled>
+    <input type="password" id="pass" placeholder="Password (123)" disabled>
+    <button id="loginBtn" class="btn-login" onclick="handleLogin()" disabled>Login</button>
+
+    <div id="adminPanel">
+        <h3>Admin: Live History</h3>
+        <div id="historyList"></div>
+        <button onclick="clearHistory()" style="background:#94a3b8; font-size: 12px;">Clear History</button>
+    </div>
+</div>
+
+<script>
+    let currentLocation = null;
+    let isLocationReady = false;
+
+    // --- 1. Location Logic ---
+    function enableLocation() {
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser");
+            return;
+        }
+
+        // Use watchPosition for "Live" updates
+        navigator.geolocation.watchPosition(
+            (position) => {
+                currentLocation = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                    timestamp: new Date().toLocaleTimeString()
+                };
+                
+                // Unlock the UI
+                isLocationReady = true;
+                const status = document.getElementById('status');
+                status.innerText = "✅ Location Active - Login Enabled";
+                status.classList.add('active');
+
+
+                document.getElementById('user').disabled = false;
+                document.getElementById('pass').disabled = false;
+                document.getElementById('loginBtn').disabled = false;
+            },
+            (error) => {
+                alert("Error: You must allow location access to use this site.");
+                console.error(error);
+            },
+            { enableHighAccuracy: true }
+        );
+    }
+
+    // --- 2. Authentication Logic ---
+    function handleLogin() {
+        const userField = document.getElementById('user').value;
+        const passField = document.getElementById('pass').value;
+
+        if (userField === "safaa" && passField === "123") {
+            saveLocationData(userField);
+            
+            // In this logic, 'safaa' is the admin
+            if (userField === "safaa") {
+                loadAdminPanel();
+            } else {
+                alert("Login successful! Location recorded.");
+            }
+        } else {
+            alert("Wrong username or password.");
+        }
+    }
+
+    // --- 3. Data Management ---
+    function saveLocationData(username) {
+        let history = JSON.parse(localStorage.getItem('userHistory')) || [];
+        
+        const entry = {
+            username: username,
+            lat: currentLocation.lat,
+            lng: currentLocation.lng,
+            time: currentLocation.timestamp
+        };
+        
+        history.push(entry);
+        localStorage.setItem('userHistory', JSON.stringify(history));
+    }
+
+    function loadAdminPanel() {
+        document.getElementById('adminPanel').style.display = 'block';
+        const listContainer = document.getElementById('historyList');
+        const history = JSON.parse(localStorage.getItem('userHistory')) || [];
+        
+        listContainer.innerHTML = history.reverse().map(item => 
+            <div class="history-item">
+                <strong>User:</strong> ${item.username} <br>
+                <strong>Time:</strong> ${item.time} <br>
+                <strong>Coords:</strong> ${item.lat.toFixed(4)}, ${item.lng.toFixed(4)} <br>
+                <a href="https://www.google.com/maps?q=${item.lat},${item.lng}" 
+                   target="_blank" class="map-link">
+                   🚀 View Live on Google Maps
+                </a>
+            </div>
+        ).join('');
+    }
+
+    function clearHistory() {
+        localStorage.removeItem('userHistory');
+        loadAdminPanel();
+    }
+</script>
+
+</body>
+</html>
