@@ -1,204 +1,406 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ku">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mandoob Tracker System</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --danger: #dc2626;
-            --success: #16a34a;
-            --bg: #f8fafc;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mandoob Tracker System</title>
 
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
-        
-        .container { 
-            background: white; padding: 30px; border-radius: 12px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 450px; 
-            direction: rtl;
-        }
+<style>
+:root {
+--primary:#2563eb;
+--danger:#dc2626;
+--success:#16a34a;
+--bg:#f8fafc;
+}
 
-        h2, h3 { text-align: center; color: #1e293b; margin-top: 0; }
-        
-        .status-box {
-            padding: 10px; border-radius: 6px; margin-bottom: 20px;
-            font-size: 14px; text-align: center;
-            background: #fef2f2; color: var(--danger); border: 1px solid #fee2e2;
-        }
+body{
+font-family:Segoe UI,sans-serif;
+background:var(--bg);
+display:flex;
+justify-content:center;
+padding:20px;
+}
 
-        .status-box.active {
-            background: #f0fdf4; color: var(--success); border: 1px solid #dcfce7;
-        }
+.container{
+background:white;
+padding:30px;
+border-radius:12px;
+box-shadow:0 4px 20px rgba(0,0,0,.1);
+width:100%;
+max-width:450px;
+direction:rtl;
+}
 
-        input {
-            width: 100%; padding: 12px; margin: 8px 0;
-            border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;
-        }
+h2,h3{
+text-align:center;
+color:#1e293b;
+}
 
-        button {
-            width: 100%; padding: 12px; margin-top: 10px; border: none;
-            border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s;
-        }
+.status-box{
+padding:10px;
+border-radius:6px;
+margin-bottom:20px;
+text-align:center;
+background:#fef2f2;
+color:var(--danger);
+}
 
-        .btn-location { background: #64748b; color: white; }
-        .btn-login { background: var(--primary); color: white; }
-        button:disabled { background: #cbd5e1; cursor: not-allowed; }
+.status-box.active{
+background:#f0fdf4;
+color:var(--success);
+}
 
-        #adminPanel { 
-            margin-top: 30px; border-top: 2px solid #e2e8f0; 
-            padding-top: 20px; display: none; 
-        }
+input{
+width:100%;
+padding:12px;
+margin:8px 0;
+border:1px solid #cbd5e1;
+border-radius:6px;
+box-sizing:border-box;
+}
 
-        .history-item {
-            background: #f1f5f9; padding: 12px; border-radius: 6px;
-            margin-bottom: 10px; font-size: 13px; line-height: 1.6;
-            border-right: 4px solid var(--primary);
-            text-align: right;
-        }
+button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:0;
+border-radius:6px;
+font-weight:bold;
+cursor:pointer;
+}
 
-        .map-link {
-            display: inline-block; margin-top: 8px; color: white;
-            background-color: var(--danger); padding: 5px 10px;
-            border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 11px;
-        }
-    </style>
+.btn-location{
+background:#64748b;
+color:white;
+}
+
+.btn-login{
+background:var(--primary);
+color:white;
+}
+
+button:disabled{
+background:#cbd5e1;
+}
+
+#adminPanel{
+display:none;
+margin-top:30px;
+border-top:2px solid #ddd;
+padding-top:20px;
+}
+
+.history-item{
+background:#f1f5f9;
+padding:12px;
+margin-bottom:10px;
+border-radius:6px;
+font-size:13px;
+}
+
+.map-link{
+display:inline-block;
+background:#dc2626;
+color:white;
+padding:5px 10px;
+margin-top:8px;
+text-decoration:none;
+border-radius:5px;
+}
+</style>
+
 </head>
+
 <body>
 
 <div class="container">
-    <h2>Secure Portal</h2>
-    
-    <div id="status" class="status-box">
-        📍 تکایە سەرەتا لۆکەیشن چالاک بکە بۆ چوونەژوورەوە
-    </div>
 
-    <button class="btn-location" onclick="enableLocation()">📍 چالاککردنی لۆکەیشن</button>
-    
-    <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+<h2>Secure Portal</h2>
 
-    <input type="text" id="user" placeholder="ناونیشانی بەکارهێنەر (یوزەر)" disabled>
-    <input type="password" id="pass" placeholder="وشەی تێپەڕ (پاسۆرد)" disabled>
-    <button id="loginBtn" class="btn-login" onclick="handleLogin()" disabled>چوونەژوورەوە (Login)</button>
-
-    <div id="adminPanel">
-        <h3>📊 چاودێری مەندوبەکان (Admin)</h3>
-        <div id="historyList"></div>
-        <button onclick="clearHistory()" style="background:#94a3b8; font-size: 12px; margin-top: 15px;">سڕینەوەی گشت داتاکان</button>
-    </div>
+<div id="status" class="status-box">
+📍 تکایە سەرەتا لۆکەیشن چالاک بکە
 </div>
 
+
+<button class="btn-location" onclick="enableLocation()">
+📍 چالاککردنی لۆکەیشن
+</button>
+
+
+<input id="user" type="text" placeholder="ناوی بەکارهێنەر" disabled>
+
+<input id="pass" type="password" placeholder="پاسۆرد" disabled>
+
+
+<button id="loginBtn" class="btn-login" onclick="login()" disabled>
+چوونەژوورەوە
+</button>
+
+
+
+<div id="adminPanel">
+
+<h3>📊 چاودێری مەندوب</h3>
+
+<div id="historyList"></div>
+
+<button onclick="clearHistory()">
+سڕینەوەی داتا
+</button>
+
+</div>
+
+
+</div>
+
+
+
 <script>
-    let currentLocation = null;
-    let isLocationReady = false;
 
-    const usersDatabase = {
-        "safaa": "123",
-        "ahmed": "123"
-    };
+let currentLocation=null;
 
-    function enableLocation() {
-        // پشکنینی سەرەتایی
-        if (!navigator.geolocation) {
-            alert("❌ هەڵە: وێبگەڕەکەت بە تەواوی ڕێگری لە لۆکەیشن دەکات.");
-            return;
-        }
 
-        alert("ناردنی داواکاری بۆ وەرگرتنی لۆکەیشن... تکایە چاوەڕوان بە چەند چرکەیەک.");
+const users={
+"safaa":"123",
+"ahmed":"123"
+};
 
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                currentLocation = {
 
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude,
-                    timestamp: new Date().toLocaleTimeString()
-                };
-                
-                isLocationReady = true;
-                const status = document.getElementById('status');
-                status.innerText = "✅ لۆکەیشن چالاکە - دەتوانیت لۆگین بپیت";
-                status.classList.add('active');
 
-                document.getElementById('user').disabled = false;
-                document.getElementById('pass').disabled = false;
-                document.getElementById('loginBtn').disabled = false;
-                alert("📍 لۆکەیشنەکەت بە سەرکەوتوویی وەرگیرا!");
-            },
-            (error) => {
-                // لێرەدا وێبگەڕەکە بە ڕوونی پێمان دەڵێت کێشەکە چییە
-                let reason = "هەڵەی نەزانراو";
-                if(error.code === 1) reason = "ڕەتکردنەوەی مۆڵەت (Permission Denied). تکایە لە ڕێکخستنی مۆبایلەکەت ڕێگا بە وێبگەڕ بدە.";
-                if(error.code === 2) reason = "شێوازی شوێن (Position Unavailable). لۆکەیشنی مۆبایلەکەت (GPS) بکوژێنەوە و دایگیرسێنەرەوە.";
-                if(error.code === 3) reason = "کاتی داواکاری بەسەرچوو (Timeout). هێڵی ئینتەرنێتەکەت جێگیر نییە.";
-                
-                alert("⚠️ لۆکەیشن کارناکات بەهۆی:\n" + reason);
-                console.error(error);
-            },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-        );
-    }
+function enableLocation(){
 
-    function handleLogin() {
-        const userField = document.getElementById('user').value.trim().toLowerCase();
-        const passField = document.getElementById('pass').value;
+if(!navigator.geolocation){
 
-        if (usersDatabase[userField] && usersDatabase[userField] === passField) {
-            saveLocationData(userField);
-            if (userField === "safaa") {
-                loadAdminPanel();
-                alert("بەخێربێیت ئەدمین سەفا.");
-            } else {
-                alert("لۆگین سەرکەوتوو بوو بۆ مەندوب: " + userField);
-            }
-        } else {
-            alert("یوزەر یان پاسۆرد هەڵەیە!");
-        }
-    }
+alert("براوزەرەکەت پشتگیری لۆکەیشن ناکات");
+return;
 
-    function saveLocationData(username) {
-        let history = JSON.parse(localStorage.getItem('mandoobHistory')) || [];
-        const entry = {
-            username: username,
-            lat: currentLocation.lat,
-            lng: currentLocation.lng,
-            time: currentLocation.timestamp
-        };
-        history.push(entry);
-        localStorage.setItem('mandoobHistory', JSON.stringify(history));
-    }
+}
 
-    function loadAdminPanel() {
-        document.getElementById('adminPanel').style.display = 'block';
-        const listContainer = document.getElementById('historyList');
-        const history = JSON.parse(localStorage.getItem('mandoobHistory')) || [];
-        
-        if(history.length === 0) {
-            listContainer.innerHTML = "<p style='text-align:center;'>هیچ داتایەک بەردەست نییە</p>";
-            return;
-        }
 
-        listContainer.innerHTML = history.reverse().map(item => 
-            <div class="history-item">
-                <strong>👤 مەندوب:</strong> ${item.username.toUpperCase()} <br>
-                <strong>⏰ کات:</strong> ${item.time} <br>
-                <strong>📍 کۆردینات:</strong> ${item.lat.toFixed(5)}, ${item.lng.toFixed(5)} <br>
-                <a href="https://www.google.com/maps?q=${item.lat},${item.lng}" 
-                   target="_blank" class="map-link">
-                   🗺️ بینین لەسەر نەخشەی گوگل
-                </a>
-            </div>
-        ).join('');
-    }
+navigator.geolocation.getCurrentPosition(
 
-    function clearHistory() {
-        if(confirm("دڵنیای لە سڕینەوە؟")) {
-            localStorage.removeItem('mandoobHistory');
-            loadAdminPanel();
-        }
-    }
+function(position){
+
+
+currentLocation={
+
+lat:position.coords.latitude,
+
+lng:position.coords.longitude,
+
+time:new Date().toLocaleString()
+
+};
+
+
+
+document.getElementById("status").innerHTML=
+"✅ لۆکەیشن چالاکە";
+
+
+document.getElementById("status")
+.classList.add("active");
+
+
+document.getElementById("user").disabled=false;
+
+document.getElementById("pass").disabled=false;
+
+document.getElementById("loginBtn").disabled=false;
+
+
+
+alert("📍 لۆکەیشن وەرگیرا");
+
+
+},
+
+
+function(error){
+
+
+if(error.code==1){
+
+alert("مۆڵەتی لۆکەیشن ڕەتکراوەتەوە");
+
+}
+
+else if(error.code==2){
+
+alert("GPS نادیارە");
+
+}
+
+else{
+
+alert("کێشە لە لۆکەیشن");
+
+}
+
+
+},
+
+
+{
+
+enableHighAccuracy:true,
+
+timeout:15000,
+
+maximumAge:0
+
+}
+
+
+
+);
+
+
+}
+
+
+
+
+
+function login(){
+
+
+let u=document.getElementById("user").value.toLowerCase();
+
+let p=document.getElementById("pass").value;
+
+
+
+if(users[u] && users[u]==p){
+
+
+saveData(u);
+
+
+
+if(u=="safaa"){
+
+document.getElementById("adminPanel").style.display="block";
+
+showData();
+
+}
+
+
+
+alert("لۆگین سەرکەوتوو بوو");
+
+
+}
+
+else{
+
+
+alert("یوزەر یان پاسۆرد هەڵەیە");
+
+}
+
+
+
+}
+
+
+
+
+function saveData(user){
+
+
+let data=
+JSON.parse(localStorage.getItem("mandoob")) || [];
+
+
+data.push({
+
+user:user,
+
+lat:currentLocation.lat,
+
+lng:currentLocation.lng,
+
+time:currentLocation.time
+
+
+});
+
+
+localStorage.setItem(
+"mandoob",
+JSON.stringify(data)
+
+);
+
+
+}
+
+
+
+
+function showData(){
+
+
+let box=document.getElementById("historyList");
+
+
+let data=
+JSON.parse(localStorage.getItem("mandoob")) || [];
+
+
+
+box.innerHTML="";
+
+
+data.reverse().forEach(x=>{
+
+
+box.innerHTML+=`
+
+<div class="history-item">
+
+👤 ${x.user}<br>
+
+⏰ ${x.time}<br>
+
+📍 ${x.lat}, ${x.lng}
+
+<br>
+
+<a class="map-link"
+href="https://maps.google.com/?q=${x.lat},${x.lng}"
+target="_blank">
+
+    نیشاندانی شوێن
+
+</a>
+
+</div>
+
+`;
+
+
+});
+
+
+}
+
+
+
+
+function clearHistory(){
+
+localStorage.removeItem("mandoob");
+
+showData();
+
+}
+
+
 </script>
+
 
 </body>
 </html>
