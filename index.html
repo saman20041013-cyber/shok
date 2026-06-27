@@ -12,11 +12,12 @@
             --bg: #f8fafc;
         }
 
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; direction: ltr; }
         
         .container { 
             background: white; padding: 30px; border-radius: 12px; 
             box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 450px; 
+            direction: rtl;
         }
 
         h2, h3 { text-align: center; color: #1e293b; margin-top: 0; }
@@ -34,11 +35,13 @@
         input, select {
             width: 100%; padding: 12px; margin: 8px 0;
             border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;
+            font-family: inherit;
         }
 
         button {
             width: 100%; padding: 12px; margin-top: 10px; border: none;
             border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s;
+            font-family: inherit;
         }
 
         .btn-location { background: #64748b; color: white; }
@@ -53,7 +56,8 @@
         .history-item {
             background: #f1f5f9; padding: 12px; border-radius: 6px;
             margin-bottom: 10px; font-size: 13px; line-height: 1.6;
-            border-left: 4px solid var(--primary);
+            border-right: 4px solid var(--primary);
+            text-align: right;
         }
 
         .map-link {
@@ -66,7 +70,7 @@
 <body>
 
 <div class="container">
-    <h2>Mandoob Secure Portal</h2>
+    <h2>Secure Portal</h2>
     
     <div id="status" class="status-box">
         📍 تکایە سەرەتا لۆکەیشن چالاک بکە بۆ چوونەژوورەوە
@@ -91,15 +95,14 @@
     let currentLocation = null;
     let isLocationReady = false;
 
-    // لیستی مەندوبەکان بۆ تاقیکردنەوە (یوزەر و پاسۆردی جیاواز)
+    // لیستی بەکارهێنەران بۆ تاقیکردنەوە
     const usersDatabase = {
-        "safaa": "123", // ئەدمین
-        "ahmed": "123", // مەندوب 1
-        "karwan": "123", // مەندوب 2
-        "lana": "123"    // مەندوب 3
+        "safaa": "123",
+        "ahmed": "123",
+        "karwan": "123"
     };
 
-    // --- 1. چالاککردنی لۆکەیشن (ناکرێت لۆگین ببی تا لۆکەیشن کراوە نەبێت) ---
+    // --- 1. چالاککردنی لۆکەیشن ---
     function enableLocation() {
         if (!navigator.geolocation) {
             alert("وێبگەڕەکەت پشتگیری لۆکەیشن ناکات");
@@ -126,7 +129,7 @@
                 document.getElementById('loginBtn').disabled = false;
             },
             (error) => {
-                alert("هەڵە: بۆ بەکارهێنانی سیستەمەکە پێویستە ڕێگا بە لۆکەیشن بدەیت.");
+                alert("هەڵەی لۆکەیشن: " + error.message + "\nتکایە دڵنیابەرەوە کە لۆکەیشنی مۆبایلەکەت کراوەیە و ڕێگەت بە وێبگەڕەکە داوە.");
                 console.error(error);
             },
             { enableHighAccuracy: true }
@@ -138,18 +141,14 @@
         const userField = document.getElementById('user').value.trim().toLowerCase();
         const passField = document.getElementById('pass').value;
 
-        // پشکنیین کە ئایا یوزەر و پاسۆردەکە لە داتابەیسەکەدا هەن
         if (usersDatabase[userField] && usersDatabase[userField] === passField) {
-            
-            // پاشەکەوتکردنی شوێنی مەندوبەکە
             saveLocationData(userField);
             
             if (userField === "safaa") {
-                // ئەگەر ئەدمین بوو پانێڵەکەی پیشان بدە
                 loadAdminPanel();
                 alert("بەخێربێیت ئەدمین سەفا. لیستی مەندوبەکان نوێکرایەوە.");
             } else {
-                alert("لۆگین سەرکەوتوو بوو! لۆکەیشنەکەت بۆ ئەدمین نێردرا: " + userField);
+                alert("لۆگین سەرکەوتوو بوو! لۆکەیشنەکەت تۆمارکرا: " + userField);
             }
         } else {
             alert("یوزەر یان پاسۆرد هەڵەیە!");
@@ -160,7 +159,6 @@
     function saveLocationData(username) {
         let history = JSON.parse(localStorage.getItem('mandoobHistory')) || [];
         
-        // دروستکردنی تۆماری نوێ بۆ مەندوبەکە
         const entry = {
             username: username,
             lat: currentLocation.lat,
@@ -172,7 +170,7 @@
         localStorage.setItem('mandoobHistory', JSON.stringify(history));
     }
 
-    // --- 4. نیشاندانی هەموو مەندوبەکان لە یەک شوێن لای ئەدمین ---
+    // --- 4. نیشاندانی پانێڵی ئەدمین ---
     function loadAdminPanel() {
         document.getElementById('adminPanel').style.display = 'block';
         const listContainer = document.getElementById('historyList');
@@ -183,18 +181,18 @@
             return;
         }
 
-        // نیشاندانی گشت مەندوبەکان بە پێی کاتی لۆگین (نوێترین لە سەرەوە)
+        // بەکارهێنانی Backticks () بە شێوازی دروست
         listContainer.innerHTML = history.reverse().map(item => 
             <div class="history-item">
                 <strong>👤 مەندوب:</strong> ${item.username.toUpperCase()} <br>
                 <strong>⏰ کات:</strong> ${item.time} <br>
                 <strong>📍 کۆردینات:</strong> ${item.lat.toFixed(5)}, ${item.lng.toFixed(5)} <br>
-                <a href="https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}" 
+                <a href="https://www.google.com/maps?q=${item.lat},${item.lng}" 
                    target="_blank" class="map-link">
                    🗺️ بینین لەسەر نەخشەی گوگل
                 </a>
             </div>
-        ).join('');
+        `).join('');
     }
 
     function clearHistory() {
