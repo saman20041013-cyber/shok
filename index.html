@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SafeLogin & Live Tracker</title>
+    <title>Mandoob Tracker System</title>
     <style>
         :root {
             --primary: #2563eb;
@@ -16,10 +16,10 @@
         
         .container { 
             background: white; padding: 30px; border-radius: 12px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 400px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 100%; max-width: 450px; 
         }
 
-        h2 { text-align: center; color: #1e293b; margin-top: 0; }
+        h2, h3 { text-align: center; color: #1e293b; margin-top: 0; }
         
         .status-box {
             padding: 10px; border-radius: 6px; margin-bottom: 20px;
@@ -31,7 +31,7 @@
             background: #f0fdf4; color: var(--success); border: 1px solid #dcfce7;
         }
 
-        input {
+        input, select {
             width: 100%; padding: 12px; margin: 8px 0;
             border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;
         }
@@ -51,37 +51,39 @@
         }
 
         .history-item {
-            background: #f1f5f9; padding: 10px; border-radius: 6px;
+            background: #f1f5f9; padding: 12px; border-radius: 6px;
             margin-bottom: 10px; font-size: 13px; line-height: 1.6;
+            border-left: 4px solid var(--primary);
         }
 
         .map-link {
-            display: inline-block; margin-top: 5px; color: var(--danger);
-            text-decoration: none; font-weight: bold;
+            display: inline-block; margin-top: 8px; color: white;
+            background-color: var(--danger); padding: 5px 10px;
+            border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 11px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Secure Portal</h2>
+    <h2>Mandoob Secure Portal</h2>
     
     <div id="status" class="status-box">
-        📍 Location access required to login.
+        📍 تکایە سەرەتا لۆکەیشن چالاک بکە بۆ چوونەژوورەوە
     </div>
 
-    <button class="btn-location" onclick="enableLocation()">Enable Location Access</button>
+    <button class="btn-location" onclick="enableLocation()">📍 چالاککردنی لۆکەیشن</button>
     
     <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
 
-    <input type="text" id="user" placeholder="Username (safaa)" disabled>
-    <input type="password" id="pass" placeholder="Password (123)" disabled>
-    <button id="loginBtn" class="btn-login" onclick="handleLogin()" disabled>Login</button>
+    <input type="text" id="user" placeholder="ناونیشانی بەکارهێنەر (یوزەر)" disabled>
+    <input type="password" id="pass" placeholder="وشەی تێپەڕ (پاسۆرد)" disabled>
+    <button id="loginBtn" class="btn-login" onclick="handleLogin()" disabled>چوونەژوورەوە (Login)</button>
 
     <div id="adminPanel">
-        <h3>Admin: Live History</h3>
+        <h3>📊 چاودێری مەندوبەکان (Admin)</h3>
         <div id="historyList"></div>
-        <button onclick="clearHistory()" style="background:#94a3b8; font-size: 12px;">Clear History</button>
+        <button onclick="clearHistory()" style="background:#94a3b8; font-size: 12px; margin-top: 15px;">سڕینەوەی گشت داتاکان</button>
     </div>
 </div>
 
@@ -89,64 +91,76 @@
     let currentLocation = null;
     let isLocationReady = false;
 
-    // --- 1. Location Logic ---
+    // لیستی مەندوبەکان بۆ تاقیکردنەوە (یوزەر و پاسۆردی جیاواز)
+    const usersDatabase = {
+        "safaa": "123", // ئەدمین
+        "ahmed": "123", // مەندوب 1
+        "karwan": "123", // مەندوب 2
+        "lana": "123"    // مەندوب 3
+    };
+
+    // --- 1. چالاککردنی لۆکەیشن (ناکرێت لۆگین ببی تا لۆکەیشن کراوە نەبێت) ---
     function enableLocation() {
         if (!navigator.geolocation) {
-            alert("Geolocation is not supported by your browser");
+            alert("وێبگەڕەکەت پشتگیری لۆکەیشن ناکات");
             return;
         }
 
-        // Use watchPosition for "Live" updates
         navigator.geolocation.watchPosition(
             (position) => {
+
+
                 currentLocation = {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude,
                     timestamp: new Date().toLocaleTimeString()
                 };
                 
-                // Unlock the UI
                 isLocationReady = true;
                 const status = document.getElementById('status');
-                status.innerText = "✅ Location Active - Login Enabled";
+                status.innerText = "✅ لۆکەیشن چالاکە - دەتوانیت لۆگین بپیت";
                 status.classList.add('active');
-
 
                 document.getElementById('user').disabled = false;
                 document.getElementById('pass').disabled = false;
                 document.getElementById('loginBtn').disabled = false;
             },
             (error) => {
-                alert("Error: You must allow location access to use this site.");
+                alert("هەڵە: بۆ بەکارهێنانی سیستەمەکە پێویستە ڕێگا بە لۆکەیشن بدەیت.");
                 console.error(error);
             },
             { enableHighAccuracy: true }
         );
     }
 
-    // --- 2. Authentication Logic ---
+    // --- 2. سیستەمی لۆگین ---
     function handleLogin() {
-        const userField = document.getElementById('user').value;
+        const userField = document.getElementById('user').value.trim().toLowerCase();
         const passField = document.getElementById('pass').value;
 
-        if (userField === "safaa" && passField === "123") {
+        // پشکنیین کە ئایا یوزەر و پاسۆردەکە لە داتابەیسەکەدا هەن
+        if (usersDatabase[userField] && usersDatabase[userField] === passField) {
+            
+            // پاشەکەوتکردنی شوێنی مەندوبەکە
             saveLocationData(userField);
             
-            // In this logic, 'safaa' is the admin
             if (userField === "safaa") {
+                // ئەگەر ئەدمین بوو پانێڵەکەی پیشان بدە
                 loadAdminPanel();
+                alert("بەخێربێیت ئەدمین سەفا. لیستی مەندوبەکان نوێکرایەوە.");
             } else {
-                alert("Login successful! Location recorded.");
+                alert("لۆگین سەرکەوتوو بوو! لۆکەیشنەکەت بۆ ئەدمین نێردرا: " + userField);
             }
         } else {
-            alert("Wrong username or password.");
+            alert("یوزەر یان پاسۆرد هەڵەیە!");
         }
     }
 
-    // --- 3. Data Management ---
+    // --- 3. پاشەکەوتکردنی داتاکان ---
     function saveLocationData(username) {
-        let history = JSON.parse(localStorage.getItem('userHistory')) || [];
+        let history = JSON.parse(localStorage.getItem('mandoobHistory')) || [];
         
+        // دروستکردنی تۆماری نوێ بۆ مەندوبەکە
         const entry = {
             username: username,
             lat: currentLocation.lat,
@@ -155,30 +169,39 @@
         };
         
         history.push(entry);
-        localStorage.setItem('userHistory', JSON.stringify(history));
+        localStorage.setItem('mandoobHistory', JSON.stringify(history));
     }
 
+    // --- 4. نیشاندانی هەموو مەندوبەکان لە یەک شوێن لای ئەدمین ---
     function loadAdminPanel() {
         document.getElementById('adminPanel').style.display = 'block';
         const listContainer = document.getElementById('historyList');
-        const history = JSON.parse(localStorage.getItem('userHistory')) || [];
+        const history = JSON.parse(localStorage.getItem('mandoobHistory')) || [];
         
+        if(history.length === 0) {
+            listContainer.innerHTML = "<p style='text-align:center; color:#64748b;'>هیچ داتایەک بەردەست نییە</p>";
+            return;
+        }
+
+        // نیشاندانی گشت مەندوبەکان بە پێی کاتی لۆگین (نوێترین لە سەرەوە)
         listContainer.innerHTML = history.reverse().map(item => 
             <div class="history-item">
-                <strong>User:</strong> ${item.username} <br>
-                <strong>Time:</strong> ${item.time} <br>
-                <strong>Coords:</strong> ${item.lat.toFixed(4)}, ${item.lng.toFixed(4)} <br>
-                <a href="https://www.google.com/maps?q=${item.lat},${item.lng}" 
+                <strong>👤 مەندوب:</strong> ${item.username.toUpperCase()} <br>
+                <strong>⏰ کات:</strong> ${item.time} <br>
+                <strong>📍 کۆردینات:</strong> ${item.lat.toFixed(5)}, ${item.lng.toFixed(5)} <br>
+                <a href="https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}" 
                    target="_blank" class="map-link">
-                   🚀 View Live on Google Maps
+                   🗺️ بینین لەسەر نەخشەی گوگل
                 </a>
             </div>
         ).join('');
     }
 
     function clearHistory() {
-        localStorage.removeItem('userHistory');
-        loadAdminPanel();
+        if(confirm("دڵنیای لە سڕینەوەی هەموو تۆمارەکان؟")) {
+            localStorage.removeItem('mandoobHistory');
+            loadAdminPanel();
+        }
     }
 </script>
 
