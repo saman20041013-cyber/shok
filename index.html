@@ -12,7 +12,7 @@
             --bg: #f8fafc;
         }
 
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; direction: ltr; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; }
         
         .container { 
             background: white; padding: 30px; border-radius: 12px; 
@@ -32,16 +32,14 @@
             background: #f0fdf4; color: var(--success); border: 1px solid #dcfce7;
         }
 
-        input, select {
+        input {
             width: 100%; padding: 12px; margin: 8px 0;
             border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;
-            font-family: inherit;
         }
 
         button {
             width: 100%; padding: 12px; margin-top: 10px; border: none;
             border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.2s;
-            font-family: inherit;
         }
 
         .btn-location { background: #64748b; color: white; }
@@ -95,25 +93,24 @@
     let currentLocation = null;
     let isLocationReady = false;
 
-    // لیستی بەکارهێنەران بۆ تاقیکردنەوە
     const usersDatabase = {
         "safaa": "123",
-        "ahmed": "123",
-        "karwan": "123"
+        "ahmed": "123"
     };
 
-    // --- 1. چالاککردنی لۆکەیشن ---
     function enableLocation() {
+        // پشکنینی سەرەتایی
         if (!navigator.geolocation) {
-            alert("وێبگەڕەکەت پشتگیری لۆکەیشن ناکات");
+            alert("❌ هەڵە: وێبگەڕەکەت بە تەواوی ڕێگری لە لۆکەیشن دەکات.");
             return;
         }
 
-        navigator.geolocation.watchPosition(
+        alert("ناردنی داواکاری بۆ وەرگرتنی لۆکەیشن... تکایە چاوەڕوان بە چەند چرکەیەک.");
+
+        navigator.geolocation.getCurrentPosition(
             (position) => {
-
-
                 currentLocation = {
+
                     lat: position.coords.latitude,
                     lng: position.coords.longitude,
                     timestamp: new Date().toLocaleTimeString()
@@ -127,61 +124,61 @@
                 document.getElementById('user').disabled = false;
                 document.getElementById('pass').disabled = false;
                 document.getElementById('loginBtn').disabled = false;
+                alert("📍 لۆکەیشنەکەت بە سەرکەوتوویی وەرگیرا!");
             },
             (error) => {
-                alert("هەڵەی لۆکەیشن: " + error.message + "\nتکایە دڵنیابەرەوە کە لۆکەیشنی مۆبایلەکەت کراوەیە و ڕێگەت بە وێبگەڕەکە داوە.");
+                // لێرەدا وێبگەڕەکە بە ڕوونی پێمان دەڵێت کێشەکە چییە
+                let reason = "هەڵەی نەزانراو";
+                if(error.code === 1) reason = "ڕەتکردنەوەی مۆڵەت (Permission Denied). تکایە لە ڕێکخستنی مۆبایلەکەت ڕێگا بە وێبگەڕ بدە.";
+                if(error.code === 2) reason = "شێوازی شوێن (Position Unavailable). لۆکەیشنی مۆبایلەکەت (GPS) بکوژێنەوە و دایگیرسێنەرەوە.";
+                if(error.code === 3) reason = "کاتی داواکاری بەسەرچوو (Timeout). هێڵی ئینتەرنێتەکەت جێگیر نییە.";
+                
+                alert("⚠️ لۆکەیشن کارناکات بەهۆی:\n" + reason);
                 console.error(error);
             },
-            { enableHighAccuracy: true }
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
         );
     }
 
-    // --- 2. سیستەمی لۆگین ---
     function handleLogin() {
         const userField = document.getElementById('user').value.trim().toLowerCase();
         const passField = document.getElementById('pass').value;
 
         if (usersDatabase[userField] && usersDatabase[userField] === passField) {
             saveLocationData(userField);
-            
             if (userField === "safaa") {
                 loadAdminPanel();
-                alert("بەخێربێیت ئەدمین سەفا. لیستی مەندوبەکان نوێکرایەوە.");
+                alert("بەخێربێیت ئەدمین سەفا.");
             } else {
-                alert("لۆگین سەرکەوتوو بوو! لۆکەیشنەکەت تۆمارکرا: " + userField);
+                alert("لۆگین سەرکەوتوو بوو بۆ مەندوب: " + userField);
             }
         } else {
             alert("یوزەر یان پاسۆرد هەڵەیە!");
         }
     }
 
-    // --- 3. پاشەکەوتکردنی داتاکان ---
     function saveLocationData(username) {
         let history = JSON.parse(localStorage.getItem('mandoobHistory')) || [];
-        
         const entry = {
             username: username,
             lat: currentLocation.lat,
             lng: currentLocation.lng,
             time: currentLocation.timestamp
         };
-        
         history.push(entry);
         localStorage.setItem('mandoobHistory', JSON.stringify(history));
     }
 
-    // --- 4. نیشاندانی پانێڵی ئەدمین ---
     function loadAdminPanel() {
         document.getElementById('adminPanel').style.display = 'block';
         const listContainer = document.getElementById('historyList');
         const history = JSON.parse(localStorage.getItem('mandoobHistory')) || [];
         
         if(history.length === 0) {
-            listContainer.innerHTML = "<p style='text-align:center; color:#64748b;'>هیچ داتایەک بەردەست نییە</p>";
+            listContainer.innerHTML = "<p style='text-align:center;'>هیچ داتایەک بەردەست نییە</p>";
             return;
         }
 
-        // بەکارهێنانی Backticks () بە شێوازی دروست
         listContainer.innerHTML = history.reverse().map(item => 
             <div class="history-item">
                 <strong>👤 مەندوب:</strong> ${item.username.toUpperCase()} <br>
@@ -192,11 +189,11 @@
                    🗺️ بینین لەسەر نەخشەی گوگل
                 </a>
             </div>
-        `).join('');
+        ).join('');
     }
 
     function clearHistory() {
-        if(confirm("دڵنیای لە سڕینەوەی هەموو تۆمارەکان؟")) {
+        if(confirm("دڵنیای لە سڕینەوە؟")) {
             localStorage.removeItem('mandoobHistory');
             loadAdminPanel();
         }
